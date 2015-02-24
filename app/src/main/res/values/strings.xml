@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">CopyHTML</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="addAddressButtonText">Pridaj adresu...</string>
+    <string name="downloadButtonText">Stiahni obsah!</string>
+    <string name="labelTextViewText">Adresy:</string>
+    <string name="title_activity_content_viewer">ContentViewer</string>
+    <string name="content">Content</string>
+    <string name="content_address">Address</string>
+</resources>

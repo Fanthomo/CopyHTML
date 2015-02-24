@@ -1,0 +1,63 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity"
+    android:backgroundTintMode="multiply"
+    android:backgroundTint="#ff011674"
+    android:background="@mipmap/ic_launcher">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:weightSum="1"
+        android:backgroundTintMode="screen"
+        android:background="#ffb1adb6">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/labelTextViewText"
+            android:id="@+id/labelTextView"
+            android:background="#ff000000"
+            android:textColor="#ffff7437"
+            android:textStyle="bold"
+            android:layout_gravity="top|center"
+            android:paddingLeft="10dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp" />
+
+        <FrameLayout
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="12dp">
+
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/list"
+                android:layout_gravity="center_horizontal"
+                android:background="#c8cff5ff" />
+        </FrameLayout>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/addAddressButtonText"
+            android:id="@+id/addAddressButton"
+            android:layout_gravity="bottom|center_horizontal" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/downloadButtonText"
+            android:id="@+id/downloadButton"
+            android:layout_gravity="bottom|center_horizontal" />
+
+    </LinearLayout>
+
+</RelativeLayout>
