@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 
 /**
  * Created by Fanthomo on 23. 2. 2015.
@@ -22,6 +23,7 @@ import java.io.InputStreamReader;
 public class ContentGetter {
 
     HttpClient httpclient;
+    HttpURLConnection client;
 
     public ContentGetter(){
         HttpParams httpParameters = new BasicHttpParams();
