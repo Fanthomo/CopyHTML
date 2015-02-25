@@ -27,18 +27,14 @@
             android:layout_height="fill_parent"
             android:id="@+id/scrollView" >
 
-            <HorizontalScrollView
-                android:layout_width="wrap_content"
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/horizontalScrollView" >
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="@string/content"
-                    android:id="@+id/contentTextView" />
-            </HorizontalScrollView>
+                android:text="@string/content"
+                android:id="@+id/contentTextView"
+                android:autoLink="web" />
         </ScrollView>
+
     </LinearLayout>
 </RelativeLayout>
