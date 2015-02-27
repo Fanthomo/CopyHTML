@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,10 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.CharBuffer;
 import java.util.ArrayList;
 
 
@@ -39,29 +38,22 @@ public class MainActivity extends Activity {
     private ListView listView; //view pre zoznam adries
     private ArrayList<String> listOfValues; // zoznam ktory uchovava adresy
     private ArrayList<String> contentContainer; // uchovava obsah webstranky
-    private int index = 0;
-    private ContentGetter contentGetter; // zabezpecuje stiahnutie obsahu zadanej webstranky
     private boolean downloaded = false; // indikuje, ci stiahnutie prebehlo
 
-    @Override
-    protected void onPause(){
-        super.onPause();
-    }
-
-    protected void onResume(){
-        super.onResume();
-    }
+    private ProgressBar bar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //inicializacia zoznamov, widgetov a pohladov
+
+        //inicializacia zoznamov, widgetov a pohladov...
         listView = (ListView) findViewById(R.id.list);
         Button addAddrBtn = (Button) findViewById(R.id.addAddressButton);
         Button downloadContBtn = (Button) findViewById(R.id.downloadButton);
-        listOfValues = new ArrayList<String>();
+        bar = (ProgressBar) this.findViewById(R.id.progressBar);
+        listOfValues = new ArrayList<>();
         updateListView(); // pridame obsah adries do ListView
         // osetrenie stlacenia tlacidiel
         addAddrBtn.setOnClickListener(new View.OnClickListener() {
@@ -93,14 +85,13 @@ public class MainActivity extends Activity {
 
     // po vyhodnoteni dialogu sa ako vstupny parameter tejto metody posle adresa z dialogu
     private void addItem(String item) {
-        //kontrola, ci retazey nie je prazdny
+        //kontrola, ci retazec nie je prazdny
         if (!item.equals("")) {
             item = addressValidate(item); //pridanie prefixu http:// ak je to porebne
-            index++;
             listOfValues.add(item);
             Toast.makeText(this, "Pridane: " + item, Toast.LENGTH_SHORT).show();
             updateListView();
-            downloaded = false;
+            downloaded = false; //nastavi indikator stiahnutia na false
         } else {
             Toast.makeText(this, "Nezadal si adresu", Toast.LENGTH_SHORT).show();
         }
@@ -125,7 +116,7 @@ public class MainActivity extends Activity {
             b.setNegativeButton("CANCEL", null);
             b.create().show();
         }
-    // validacna metoda pre adresu
+    // validacna metoda pre adresu - prida prefix http
     private String addressValidate (String address){
         if (address.startsWith("http://")){
             return address;
@@ -133,18 +124,18 @@ public class MainActivity extends Activity {
             return "http://" + address;
         }
     }
-
+    //metoda pre stiahnutie zdrojových kodov stranok
     private void downloadContent(){
-        contentGetter = new ContentGetter();
         contentContainer = new ArrayList<>();
         for (final String item: listOfValues){
-            new DownloadWebpageTask().execute(item);
+            // na pozadi sa vykona stiahnutie jednotlivych stranok
+            String islast = (listOfValues.get(listOfValues.size()-1).equals(item))? "true": "false"; // je posledny?
+            new DownloadWebpageTask().execute(item ,islast);
         }
-        downloaded = true;
         setListener();
-        //Toast.makeText(this, "OK - " + !contentContainer.isEmpty(), Toast.LENGTH_SHORT).show();
     }
 
+    // nastavime listener pre kliknutie na adresu pre zobrazenie obsahu
     private void setListener(){
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -154,50 +145,66 @@ public class MainActivity extends Activity {
         });
     }
 
+    //otvorime novu aktivitu pre zobrazenie obsahu
+    //ako vstup je nazov adresy a pozicia v zozname adries
     private void showContent(String address, int position){
         if (!downloaded) {
             Toast.makeText(this, "Data nie su stiahnute...", Toast.LENGTH_SHORT).show();
         }
         else {
+            bar.setVisibility(View.VISIBLE);
             Intent intent = new Intent(this, ContentViewer.class);
             intent.putExtra(CopyHTML_content, contentContainer.get(position));
             intent.putExtra(CopyHTML_content_address, address);
 
             startActivity(intent);
+            bar.setVisibility(View.GONE);
         }
     }
 
-    //-----------podtrieda------------------------------------------------------------------
-
+    //-----------------------------------------------------------------------------
+    // tato trieda zabezpecuje stiahnutie obsahu adresy na pozadi
     private class DownloadWebpageTask extends AsyncTask<String, Void, String>{
 
         private String address;
+        private String islast;
 
         @Override
         protected String doInBackground(String... urls) {
 
-            // params comes from the execute() call: params[0] is the url.
+            // params pochadzaju z execute() call: params[0] je url,
             address = urls[0];
-            try {
+            islast = urls[1];
 
+            try {
                 return downloadUrl(urls[0]);
             } catch (IOException e) {
                 return "Unable to retrieve web page. URL may be invalid.";
             }
         }
-        // onPostExecute displays the results of the AsyncTask.
+        @Override
+        protected void onPreExecute(){
+            //zobrazenie progress baru
+            bar.setVisibility(View.VISIBLE);
+        }
+
+        // onPostExecute zobrazi/vlozi do zoznamu vysledok z AsyncTask.
         @Override
         protected void onPostExecute(String result) {
             contentContainer.add(result);
+            if (islast.equals("true")) {
+                downloaded = true; //nastavim indikator stiahnutia
+                bar.setVisibility(View.INVISIBLE);
+            }
             Toast.makeText(MainActivity.this, "Downloaded: " + address, Toast.LENGTH_SHORT).show();
         }
 
         private String downloadUrl(String myurl) throws IOException {
             InputStream is = null;
-            // Only display the first 500 characters of the retrieved
-            // web page content.
+            // obmedzenie iba na prvych 250 000 ziskanych znakov
             int len = 250000;
 
+            //nadviazanie spojenia
             try {
                 URL url = new URL(myurl);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -205,29 +212,26 @@ public class MainActivity extends Activity {
                 conn.setConnectTimeout(15000 /* milliseconds */);
                 conn.setRequestMethod("GET");
                 conn.setDoInput(true);
-                // Starts the query
+                // spustenie spojenia
                 conn.connect();
                 int response = conn.getResponseCode();
                 Log.d(DEBUG_TAG, "The response is: " + response);
                 is = conn.getInputStream();
 
-                // Convert the InputStream into a string
-
+                // Convertujeme InputStream do string
                 return readIt(is, len);
 
-                // Makes sure that the InputStream is closed after the app is
-                // finished using it.
+                // ubezpecime sa, ze je InputStream ukonceny / zavrety
             } finally {
                 if (is != null) {
                     is.close();
                 }
             }
         }
-        // Reads an InputStream and converts it to a String.
-        public String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
-            Reader reader = null;
+        // cita InputStream a convertuje ho na  String.
+        public String readIt(InputStream stream, int len) throws IOException {
+            Reader reader;
             reader = new InputStreamReader(stream, "UTF-8");
-            CharBuffer buff = null;
             char[] buffer = new char[len];
             reader.read(buffer);
             return new String(buffer);
