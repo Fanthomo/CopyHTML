@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -76,10 +77,15 @@ public class MainActivity extends Activity {
             }
         });
     }
+    //osetrenie zmeny konfiguracie
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
 
     // vytvori sa adapter s aktualnymi hodnotami a priradi sa do Listu
-    private void updateListView(){
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.simple_row1,R.id.text1, listOfValues);
+    private void updateListView() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.simple_row1, R.id.text1, listOfValues);
         listView.setAdapter(adapter);
     }
 
@@ -96,62 +102,63 @@ public class MainActivity extends Activity {
             Toast.makeText(this, "Nezadal si adresu", Toast.LENGTH_SHORT).show();
         }
     }
-        // metoda pre vytvorenie a spracovanie dialogu pre zadanie adresy
-        void showDialog(){
-            AlertDialog.Builder b = new AlertDialog.Builder(this);
-            b.setTitle("Zadaj adresu");
-            final EditText input = new EditText(this);
-            b.setView(input);
-            b.setPositiveButton("OK", new DialogInterface.OnClickListener()
-            {
-                @Override
-                public void onClick(DialogInterface dialog, int whichButton) {
 
-                    String result = input.getText().toString();
-                    if (result != null) {
-                        addItem(result);
-                    }
+    // metoda pre vytvorenie a spracovanie dialogu pre zadanie adresy
+    void showDialog() {
+        AlertDialog.Builder b = new AlertDialog.Builder(this);
+        b.setTitle("Zadaj adresu");
+        final EditText input = new EditText(this);
+        b.setView(input);
+        b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int whichButton) {
+
+                String result = input.getText().toString();
+                if (result != null) {
+                    addItem(result);
                 }
-            });
-            b.setNegativeButton("CANCEL", null);
-            b.create().show();
-        }
+            }
+        });
+        b.setNegativeButton("CANCEL", null);
+        b.create().show();
+    }
+
     // validacna metoda pre adresu - prida prefix http
-    private String addressValidate (String address){
-        if (address.startsWith("http://")){
+    private String addressValidate(String address) {
+        if (address.startsWith("http://")) {
             return address;
         } else {
             return "http://" + address;
         }
     }
+
     //metoda pre stiahnutie zdrojových kodov stranok
-    private void downloadContent(){
+    private void downloadContent() {
         contentContainer = new ArrayList<>();
-        for (final String item: listOfValues){
+        for (final String item : listOfValues) {
             // na pozadi sa vykona stiahnutie jednotlivych stranok
-            String islast = (listOfValues.get(listOfValues.size()-1).equals(item))? "true": "false"; // je posledny?
-            new DownloadWebpageTask().execute(item ,islast);
+            String islast = (listOfValues.get(listOfValues.size() - 1).equals(item)) ? "true" : "false"; // je posledny?
+            new DownloadWebpageTask().execute(item, islast);
         }
         setListener();
     }
 
     // nastavime listener pre kliknutie na adresu pre zobrazenie obsahu
-    private void setListener(){
+    private void setListener() {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                showContent(((TextView)view).getText().toString(),position);
+                showContent(((TextView) view).getText().toString(), position);
             }
         });
     }
 
     //otvorime novu aktivitu pre zobrazenie obsahu
     //ako vstup je nazov adresy a pozicia v zozname adries
-    private void showContent(String address, int position){
+    private void showContent(String address, int position) {
         if (!downloaded) {
             Toast.makeText(this, "Data nie su stiahnute...", Toast.LENGTH_SHORT).show();
-        }
-        else {
+        } else {
             bar.setVisibility(View.VISIBLE);
             Intent intent = new Intent(this, ContentViewer.class);
             intent.putExtra(CopyHTML_content, contentContainer.get(position));
@@ -164,7 +171,7 @@ public class MainActivity extends Activity {
 
     //-----------------------------------------------------------------------------
     // tato trieda zabezpecuje stiahnutie obsahu adresy na pozadi
-    private class DownloadWebpageTask extends AsyncTask<String, Void, String>{
+    private class DownloadWebpageTask extends AsyncTask<String, Void, String> {
 
         private String address;
         private String islast;
@@ -182,8 +189,9 @@ public class MainActivity extends Activity {
                 return "Unable to retrieve web page. URL may be invalid.";
             }
         }
+
         @Override
-        protected void onPreExecute(){
+        protected void onPreExecute() {
             //zobrazenie progress baru
             bar.setVisibility(View.VISIBLE);
         }
@@ -201,8 +209,8 @@ public class MainActivity extends Activity {
 
         private String downloadUrl(String myurl) throws IOException {
             InputStream is = null;
-            // obmedzenie iba na prvych 250 000 ziskanych znakov
-            int len = 250000;
+            // obmedzenie iba na prvych 25 000 ziskanych znakov
+            int len = 25000;
 
             //nadviazanie spojenia
             try {
@@ -228,6 +236,7 @@ public class MainActivity extends Activity {
                 }
             }
         }
+
         // cita InputStream a convertuje ho na  String.
         public String readIt(InputStream stream, int len) throws IOException {
             Reader reader;
@@ -238,7 +247,6 @@ public class MainActivity extends Activity {
         }
 
     }
-
 
 
 }

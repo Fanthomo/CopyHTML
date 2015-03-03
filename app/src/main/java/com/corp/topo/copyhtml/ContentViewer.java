@@ -12,7 +12,6 @@ import android.widget.TextView;
 public class ContentViewer extends Activity {
 
 
-
     Intent intent;
     ProgressBar bar;
     TextView addrtext;
@@ -23,13 +22,13 @@ public class ContentViewer extends Activity {
         super.onCreate(savedInstanceState);
         intent = this.getIntent(); //ziskanie intentu od volajucej aktivity(rodica)
         setContentView(R.layout.activity_content_viewer);
-        bar = (ProgressBar)findViewById(R.id.progressBar2);
-        addrtext = ((TextView)findViewById(R.id.addressTextView));
-        conttext = ((TextView)findViewById(R.id.contentTextView));
+        bar = (ProgressBar) findViewById(R.id.progressBar2);
+        addrtext = ((TextView) findViewById(R.id.addressTextView));
+        conttext = ((TextView) findViewById(R.id.contentTextView));
         new loadContent().execute(); //nacitame obsah na pozadi
     }
 
-    private class loadContent  extends AsyncTask<String, Void, String>{
+    private class loadContent extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... params) {
@@ -40,7 +39,7 @@ public class ContentViewer extends Activity {
         }
 
         @Override
-        protected void onPreExecute(){
+        protected void onPreExecute() {
             bar.setVisibility(View.VISIBLE);
             addrtext.setVisibility(View.INVISIBLE);
             conttext.setVisibility(View.INVISIBLE);
@@ -54,7 +53,6 @@ public class ContentViewer extends Activity {
             conttext.setVisibility(View.VISIBLE);
         }
     }
-
 
 
 }
